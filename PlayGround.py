@@ -1,11 +1,12 @@
 import copy
-class PlayGround:
 
+
+class PlayGround:
     _cost_matrix = []
     _num_rows = -1
     _num_columns = -1
 
-    def __init__(self, player : list, obstacles : list, pucks : list, goals: list):
+    def __init__(self, player: list, obstacles: list, pucks: list, goals: list):
         """
         Initializes:\n
         _player, _obstacles, _pucks, _goals, _cost_matrix
@@ -19,6 +20,19 @@ class PlayGround:
         self.__obstacles = obstacles
         self.__pucks = pucks
         self.__goals = goals
+
+    def __eq__(self, other) -> bool:
+        """Checks if the state of two playground objects are the same in a search algorithm
+        :return: Boolean value"""
+        if isinstance(other, PlayGround):
+            if self.__player != other.player:
+                return False
+            elif self.__obstacles != other.obstacles:
+                return False
+            elif self.__pucks != other.pucks:
+                return False
+            else:
+                return True
 
     @property
     def player(self):
@@ -57,7 +71,7 @@ class PlayGround:
         return copy.copy(self._cost_matrix)
 
     @classmethod
-    def set_class_vars(cls, cost_matrix : list) -> None:
+    def set_class_vars(cls, cost_matrix: list) -> None:
         """
         Initializes:\n
         the class variables of _cost_matrix, _num_rows and _num_columns
@@ -67,4 +81,3 @@ class PlayGround:
             cls._cost_matrix = copy.copy(cost_matrix)
             cls._num_rows = len(cost_matrix)
             cls._num_columns = len(cost_matrix[0])
-

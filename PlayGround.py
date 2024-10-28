@@ -9,7 +9,7 @@ class PlayGround:
     def __init__(self, player: list, obstacles: list, pucks: list, goals: list):
         """
         Initializes:\n
-        _player, _obstacles, _pucks, _goals, _cost_matrix
+        _player, _obstacles, _pucks, _goals
 
         :param player: player[0] the x-coordinate and player[1] the y-coordinate
         :param obstacles: a list of lists that coordinates are stored in similar to the player
@@ -81,3 +81,30 @@ class PlayGround:
             cls._cost_matrix = copy.copy(cost_matrix)
             cls._num_rows = len(cost_matrix)
             cls._num_columns = len(cost_matrix[0])
+
+    def is_playground_valid(self) -> bool:
+        """
+        Checks the collisions of player and the pucks with obstacles or themselves
+        :return: the validity of the current playground state (Boolean value)
+        """
+        #may need improvements!!!
+        player_and_pucks = [self.__player] + self.__pucks
+        obstacles_and_pucks = self.__obstacles + self.__pucks
+
+        for player_or_puck in player_and_pucks:
+            try:
+                obstacles_and_pucks.remove(player_or_puck)
+            except ValueError:
+                if player_or_puck != self.__player:
+                    print(f"{player_or_puck} not in list {player_and_pucks} to be removed")
+            for obstacle_or_puck in obstacles_and_pucks:
+                if player_or_puck == obstacle_or_puck:
+                    return False
+            obstacles_and_pucks.append(player_or_puck)
+
+        return True
+
+#test case here!
+if __name__ == '__main__':
+    p1 = PlayGround([1, 2], [[1, 2], [2, 3]], [[3, 4]], [[4, 5]])
+    print(p1.is_playground_valid())

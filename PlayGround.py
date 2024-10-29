@@ -1,12 +1,9 @@
-import copy
-
-
 class PlayGround:
-    _cost_matrix = tuple()
+    _cost_matrix: tuple[tuple]
     _num_rows = -1
     _num_columns = -1
 
-    def __init__(self, player: tuple, obstacles: list, pucks: list, goals: list, obstacle_cycle=0):
+    def __init__(self, player: tuple, obstacles: list[tuple], pucks: list[tuple], goals: list[tuple[tuple, bool]], obstacle_cycle: int = 0):
         """
         Initializes:\n
         __player, __obstacles, __pucks, __goals, __obstacle_cycle
@@ -15,9 +12,9 @@ class PlayGround:
         :param obstacles: a list of tuples that in each tuple coordinates are stored in similar to the player
         :param pucks: similar to obstacles
         :param goals: similar to obstacles
+        :param obstacle_cycle: state of obstacle in a 2 by 2 square
         """
 
-        #TODO use tuples instead of list of lists should fix the problem
         self.__player = player
         self.__obstacles = obstacles
         self.__pucks = pucks
@@ -43,12 +40,11 @@ class PlayGround:
 
     @property
     def player(self):
-        return copy.copy(self.__player)
+        return self.__player
 
     @player.setter
     def player(self, player):
         self.__player = tuple(player)
-
 
     @property
     def obstacles(self):
@@ -79,14 +75,14 @@ class PlayGround:
         return self._cost_matrix
 
     @classmethod
-    def set_class_vars(cls, cost_matrix: list) -> None:
+    def set_class_vars(cls, cost_matrix: tuple[tuple]) -> None:
         """
         Initializes:\n
         the class variables of _cost_matrix, _num_rows and _num_columns
         :param cost_matrix: a tuple of tuples with n tuples that contain m elements (n*m blocks the same size the playground), specifies the cost of each move of the player to any specific point
         """
         if cls._num_rows == -1 and cls._num_columns == -1:
-            cls._cost_matrix = tuple(cost_matrix)
+            cls._cost_matrix = cost_matrix
             cls._num_rows = len(cost_matrix)
             cls._num_columns = len(cost_matrix[0])
 
@@ -145,8 +141,13 @@ class PlayGround:
             obstacle_direction = obstacle_cycle_direction.get(self.__obstacle_cycle)
             for obstacle in self.__obstacles:
                 new_obstacle_positions.append((obstacle[0] + obstacle_direction[0], obstacle[1] + obstacle_direction[1]))
-            possible_future_state = PlayGround(tuple(new_player_position), new_obstacle_positions, new_pucks_positions,
-                                               self.goals, (self.__obstacle_cycle + 1) % 4)
+            possible_future_state = PlayGround(
+                tuple(new_player_position),
+                new_obstacle_positions,
+                new_pucks_positions,
+                self.goals,
+                (self.__obstacle_cycle + 1) % 4
+            )
             if possible_future_state.is_playground_valid():
                 successor_states.append(possible_future_state)
         return successor_states

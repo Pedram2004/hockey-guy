@@ -3,7 +3,7 @@ import PlayGround
 
 class STNode:
     def __init__(self, state : PlayGround, parent : "STNODE", direction : str):
-        self.parent = parent
+        self.__parent = parent
         self.__state = state
         self.__direction = direction
         self.__children : list[STNode] = []

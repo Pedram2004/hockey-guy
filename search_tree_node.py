@@ -1,8 +1,8 @@
-import PlayGround
+from PlayGround import PlayGround
 
 
 class STNode:
-    def __init__(self, state : PlayGround, parent : "STNODE", direction : str):
+    def __init__(self, state : PlayGround, parent : "STNode", direction : str):
         self.__parent = parent
         self.__state = state
         self.__direction = direction

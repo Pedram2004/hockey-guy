@@ -3,7 +3,8 @@ class PlayGround:
     _num_rows = -1
     _num_columns = -1
 
-    def __init__(self, player: tuple, obstacles: list[tuple], pucks: list[tuple[tuple, bool]], goals: list[tuple], obstacle_cycle: int = 0) -> None:
+    def __init__(self, player: tuple, obstacles: list[tuple], pucks: list[tuple[tuple, bool]], goals: list[tuple],
+                 obstacle_cycle: int = 0) -> None:
         """
         Initializes:\n
         __player, __obstacles, __pucks, __goals, __obstacle_cycle
@@ -104,16 +105,16 @@ class PlayGround:
                 return False
         return True
 
-    def successor_func(self) -> list["PlayGround"]:
+    def successor_func(self) -> list[tuple[str, "PlayGround"]]:
         """
         Creates all possible successors of the current playground state
-        :return: a list of valid future states
+        :return: a list of pairs of valid future states and the directions that leads to them
         """
         successor_states = []
         obstacle_cycle_direction = {0: (-1, 0), 1: (0, 1), 2: (1, 0), 3: (0, -1)}
         # each cycle refers to all the obstacles position relative to the 2 by 2 square they rotate counterclockwise
-        directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]  # UP, DOWN, LEFT, RIGHT
-        for direction in directions:
+        directions = {(0, -1): "U", (0, 1): "D", (-1, 0): "L", (1, 0): "R"}  # UP, DOWN, LEFT, RIGHT
+        for direction in directions.keys():
             new_player_position = list(self.player)
             for i in range(0, 2):
                 new_player_position[i] += direction[i]
@@ -125,7 +126,7 @@ class PlayGround:
                 if new_player_position == puck_position:
                     if in_goal:
                         new_pucks_positions.append((tuple(puck_position), in_goal))
-                        continue # Puck is in goal and cannot be moved
+                        continue  # Puck is in goal and cannot be moved
                     for j in range(0, 2):
                         puck_position[j] += direction[j]
                     for goal_position in self.__goals:
@@ -137,7 +138,8 @@ class PlayGround:
             new_obstacle_positions = []
             obstacle_direction = obstacle_cycle_direction.get(self.__obstacle_cycle)
             for obstacle in self.__obstacles:
-                new_obstacle_positions.append((obstacle[0] + obstacle_direction[0], obstacle[1] + obstacle_direction[1]))
+                new_obstacle_positions.append(
+                    (obstacle[0] + obstacle_direction[0], obstacle[1] + obstacle_direction[1]))
             possible_future_state = PlayGround(
                 player=tuple(new_player_position),
                 obstacles=new_obstacle_positions,
@@ -146,7 +148,7 @@ class PlayGround:
                 obstacle_cycle=(self.__obstacle_cycle + 1) % 4
             )
             if possible_future_state.is_playground_valid():
-                successor_states.append(possible_future_state)
+                successor_states.append((directions.get(direction), possible_future_state))
         return successor_states
 
 

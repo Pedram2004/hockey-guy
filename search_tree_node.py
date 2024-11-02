@@ -1,4 +1,4 @@
-from PlayGround import PlayGround
+from playground import PlayGround
 
 
 class STNode:

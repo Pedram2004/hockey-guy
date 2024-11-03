@@ -3,8 +3,7 @@ class PlayGround:
     __num_rows = -1
     __num_columns = -1
 
-    def __init__(self, player: tuple, obstacles: list[tuple], pucks: list[tuple[tuple, bool]], goals: list[tuple],
-                 obstacle_cycle: int = 0) -> None:
+    def __init__(self, player: tuple, obstacles: list[tuple], pucks: list[tuple[tuple, bool]], goals: list[tuple], obstacle_cycle: int = 0) -> None:
         """
         Initializes:\n
         __player, __obstacles, __pucks, __goals, __obstacle_cycle
@@ -36,8 +35,8 @@ class PlayGround:
                 return True
 
     def __str__(self) -> str:
-        specifications = f"Player: {self.__player}\nPucks: {self.__pucks}\nObstacles: {self.__obstacles}"
-        return specifications
+        return f"Player: {self.__player}\nPucks: {self.__pucks}\nObstacles: {self.__obstacles}"
+
 
     @property
     def player(self):
@@ -116,28 +115,28 @@ class PlayGround:
         directions = {(0, -1): "U", (0, 1): "D", (-1, 0): "L", (1, 0): "R"}  # UP, DOWN, LEFT, RIGHT
 
         for direction in directions.keys():
-
             player_new_position = list(self.player)
             for i in range(0, 2):
                 player_new_position[i] += direction[i]
             if not PlayGround.is_index_within_range(player_new_position):
                 continue
 
+            is_illegal_move = False
             pucks_new_positions = []
             for puck_position, in_goal in list(self.__pucks):
                 puck_position = list(puck_position)
-                if player_new_position == puck_position:
-                    if in_goal:
-                        pucks_new_positions.append((tuple(puck_position), in_goal))
-                        continue  # Puck is in goal and cannot be moved
+                if player_new_position == puck_position and not in_goal:
                     for j in range(0, 2):
                         puck_position[j] += direction[j]
                     for goal_position in self.__goals:
                         if puck_position[0] == goal_position[0] and puck_position[1] == goal_position[1]:
                             in_goal = True
                     if not PlayGround.is_index_within_range(puck_position):
-                        continue
+                        is_illegal_move = True    
                 pucks_new_positions.append((tuple(puck_position), in_goal))
+                
+            if is_illegal_move:
+                continue
 
             obstacles_new_positions = []
             obstacle_direction = obstacle_cycle_direction.get(self.__obstacle_cycle)
@@ -168,3 +167,4 @@ class PlayGround:
             if not puck[1]:
                 return False
         return True
+    

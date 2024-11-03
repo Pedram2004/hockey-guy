@@ -1,4 +1,4 @@
-from playground import PlayGround
+from .playground import PlayGround
 
 
 class Node:

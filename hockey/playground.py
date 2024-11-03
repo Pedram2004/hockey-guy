@@ -37,6 +37,8 @@ class PlayGround:
     def __str__(self) -> str:
         return f"Player: {self.__player}\nPucks: {self.__pucks}\nObstacles: {self.__obstacles}"
 
+    def __hash__(self) -> int:
+        return hash((self.__player, tuple(self.__obstacles), tuple(self.__pucks)))
 
     @property
     def player(self):

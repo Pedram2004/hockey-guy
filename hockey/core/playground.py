@@ -1,7 +1,7 @@
 class PlayGround:
-    _cost_matrix: tuple[tuple]
-    _num_rows = -1
-    _num_columns = -1
+    __cost_matrix: tuple[tuple]
+    __num_rows = -1
+    __num_columns = -1
 
     def __init__(self, player: tuple, obstacles: list[tuple], pucks: list[tuple[tuple, bool]], goals: list[tuple],
                  obstacle_cycle: int = 0) -> None:
@@ -73,7 +73,7 @@ class PlayGround:
 
     @property
     def cost_matrix(self):
-        return self._cost_matrix
+        return self.__cost_matrix
 
     @classmethod
     def set_class_vars(cls, cost_matrix: tuple[tuple]) -> None:
@@ -82,15 +82,15 @@ class PlayGround:
         the class variables of _cost_matrix, _num_rows and _num_columns
         :param cost_matrix: a tuple of tuples with n tuples that contain m elements (n*m blocks the same size the playground), specifies the cost of each move of the player to any specific point
         """
-        if cls._num_rows == -1 and cls._num_columns == -1:
-            cls._cost_matrix = cost_matrix
-            cls._num_rows = len(cost_matrix)
-            cls._num_columns = len(cost_matrix[0])
+        if cls.__num_rows == -1 and cls.__num_columns == -1:
+            cls.__cost_matrix = cost_matrix
+            cls.__num_rows = len(cost_matrix)
+            cls.__num_columns = len(cost_matrix[0])
 
     @classmethod
     def is_index_within_range(cls, position: list | tuple) -> bool:
-        if 0 <= position[0] < cls._num_columns:
-            if 0 <= position[1] < cls._num_rows:
+        if 0 <= position[0] < cls.__num_columns:
+            if 0 <= position[1] < cls.__num_rows:
                 return True
         return False
 
@@ -105,7 +105,7 @@ class PlayGround:
                 return False
         return True
 
-    def successor_func(self) -> list[tuple[str, "PlayGround"]]:
+    def successor_func(self) -> list[tuple[str, "PlayGround", int]]:
         """
         Creates all possible successors of the current playground state
         :return: a list of pairs of valid future states and the directions that leads to them
@@ -114,18 +114,21 @@ class PlayGround:
         obstacle_cycle_direction = {0: (-1, 0), 1: (0, 1), 2: (1, 0), 3: (0, -1)}
         # each cycle refers to all the obstacles position relative to the 2 by 2 square they rotate counterclockwise
         directions = {(0, -1): "U", (0, 1): "D", (-1, 0): "L", (1, 0): "R"}  # UP, DOWN, LEFT, RIGHT
+
         for direction in directions.keys():
-            new_player_position = list(self.player)
+
+            player_new_position = list(self.player)
             for i in range(0, 2):
-                new_player_position[i] += direction[i]
-            if not PlayGround.is_index_within_range(new_player_position):
+                player_new_position[i] += direction[i]
+            if not PlayGround.is_index_within_range(player_new_position):
                 continue
-            new_pucks_positions = []
+
+            pucks_new_positions = []
             for puck_position, in_goal in list(self.__pucks):
                 puck_position = list(puck_position)
-                if new_player_position == puck_position:
+                if player_new_position == puck_position:
                     if in_goal:
-                        new_pucks_positions.append((tuple(puck_position), in_goal))
+                        pucks_new_positions.append((tuple(puck_position), in_goal))
                         continue  # Puck is in goal and cannot be moved
                     for j in range(0, 2):
                         puck_position[j] += direction[j]
@@ -134,34 +137,24 @@ class PlayGround:
                             in_goal = True
                     if not PlayGround.is_index_within_range(puck_position):
                         continue
-                new_pucks_positions.append((tuple(puck_position), in_goal))
-            new_obstacle_positions = []
+                pucks_new_positions.append((tuple(puck_position), in_goal))
+
+            obstacles_new_positions = []
             obstacle_direction = obstacle_cycle_direction.get(self.__obstacle_cycle)
             for obstacle in self.__obstacles:
-                new_obstacle_positions.append(
+                obstacles_new_positions.append(
                     (obstacle[0] + obstacle_direction[0], obstacle[1] + obstacle_direction[1]))
+
             possible_future_state = PlayGround(
-                player=tuple(new_player_position),
-                obstacles=new_obstacle_positions,
-                pucks=new_pucks_positions,
+                player=tuple(player_new_position),
+                obstacles=obstacles_new_positions,
+                pucks=pucks_new_positions,
                 goals=self.goals,
                 obstacle_cycle=(self.__obstacle_cycle + 1) % 4
             )
+
             if possible_future_state.is_playground_valid():
-                successor_states.append((directions.get(direction), possible_future_state))
+                cost_of_move = PlayGround.__cost_matrix[player_new_position[0]][player_new_position[1]]
+                successor_states.append((directions.get(direction), possible_future_state, cost_of_move))
+
         return successor_states
-
-
-# test cases here!
-if __name__ == '__main__':
-    PlayGround.set_class_vars([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
-    p1 = PlayGround((0, 0), [(1, 1), (2, 1)], [(1, 0), (2, 3)], [[3, 2]])
-    p2 = PlayGround((0, 0), [(1, 1), (2, 1)], [(1, 0)], [(3, 2)])
-    p3 = PlayGround((0, 1), [(0, 1), (1, 1)], [(2, 0), (0, 2)], [(3, 2)])
-    playgrounds = [p1, p2]
-    print(p3.is_playground_valid())
-    for playground in playgrounds:
-        for future in playground.successor_func():
-            print(future)
-            print()
-        print()

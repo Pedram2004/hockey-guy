@@ -158,3 +158,13 @@ class PlayGround:
                 successor_states.append((directions.get(direction), possible_future_state, cost_of_move))
 
         return successor_states
+
+    def is_final(self) -> bool:
+        """
+        Checks if all pucks are in goals
+        :return: Boolean value
+        """
+        for puck in self.__pucks:
+            if not puck[1]:
+                return False
+        return True

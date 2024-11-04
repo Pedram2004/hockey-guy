@@ -9,15 +9,31 @@ class Node:
         self.__cost_from_root = cost
         self.__children: list[Node] = []
         self.__is_final = self.__state.is_final()
+        if self.__parent is not None:
+            self.__depth: int = self.__parent.__depth + 1
+        else:
+            self.__depth: int = 0
 
     def __eq__(self, other: "Node") -> bool:
         return self.__state == other.__state
 
     def __str__(self) -> str:
         return str(self.__state)
-    
+
     def __hash__(self) -> int:
         return hash(self.__state)
+
+    def __lt__(self, other: "Node") -> bool:
+        return self.__cost_from_root < other.cost_from_root
+
+    def __le__(self, other: "Node") -> bool:
+        return self.__cost_from_root <= other.cost_from_root
+
+    def __gt__(self, other: "Node") -> bool:
+        return self.__cost_from_root > other.cost_from_root
+
+    def __ge__(self, other: "Node") -> bool:
+        return self.__cost_from_root >= other.cost_from_root
 
     @property
     def children(self):
@@ -30,7 +46,11 @@ class Node:
     @property
     def direction(self):
         return self.__direction
-    
+
+    @property
+    def cost_from_root(self):
+        return self.__cost_from_root
+
     def get_full_direction(self) -> str:
         if self.__parent is None:
             return self.__direction

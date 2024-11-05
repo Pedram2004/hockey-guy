@@ -18,7 +18,7 @@ class Node:
         return self.__state == other.__state
 
     def __str__(self) -> str:
-        return str(self.__state)
+        return f"{self.__state}\n{self.__depth}"
 
     def __hash__(self) -> int:
         return hash(self.__state)
@@ -51,10 +51,14 @@ class Node:
     def cost_from_root(self):
         return self.__cost_from_root
 
-    def get_full_direction(self) -> str:
+    @property
+    def depth(self):
+        return self.__depth
+
+    def get_path(self) -> str:
         if self.__parent is None:
             return self.__direction
-        return self.__parent.get_full_direction() + self.__direction
+        return self.__parent.get_path() + self.__direction
 
     def create_children(self) -> None:
         for direction, future_state, move_s_cost in self.__state.successor_func():

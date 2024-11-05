@@ -3,7 +3,7 @@ class PlayGround:
     __num_rows = -1
     __num_columns = -1
 
-    def __init__(self, player: tuple, obstacles: list[tuple], pucks: list[tuple[tuple, bool]], goals: list[tuple], obstacle_cycle: int = 0) -> None:
+    def __init__(self, player: tuple, pucks: list[tuple[tuple, bool]], obstacles: list[tuple], goals: list[tuple], obstacle_cycle: int = 0) -> None:
         """
         Initializes:\n
         __player, __obstacles, __pucks, __goals, __obstacle_cycle
@@ -16,8 +16,8 @@ class PlayGround:
         """
 
         self.__player = player
-        self.__obstacles = obstacles
         self.__pucks = pucks
+        self.__obstacles = obstacles
         self.__goals = goals
         self.__obstacle_cycle = obstacle_cycle
 

@@ -29,7 +29,8 @@ class PlayGround:
                 return False
             elif self.__obstacles != other.obstacles:
                 return False
-            elif self.__pucks != other.pucks:
+            elif self.__pucks != other.pucks: #TODO is this true for all cases?
+                #can't the player just swap states?
                 return False
             else:
                 return True
@@ -38,7 +39,7 @@ class PlayGround:
         return f"Player: {self.__player}\nPucks: {self.__pucks}\nObstacles: {self.__obstacles}"
 
     def __hash__(self) -> int:
-        return hash((self.__player, tuple(self.__obstacles), tuple(self.__pucks)))
+        return hash((self.__player, tuple(self.__obstacles), tuple(self.__pucks))) #TODO same thing as line 32
 
     @property
     def player(self):
@@ -77,14 +78,14 @@ class PlayGround:
         return self.__cost_matrix
 
     @classmethod
-    def set_class_vars(cls, cost_matrix: tuple[tuple]) -> None:
+    def set_class_vars(cls, cost_matrix: list[list]) -> None:
         """
         Initializes:\n
         the class variables of _cost_matrix, _num_rows and _num_columns
         :param cost_matrix: a tuple of tuples with n tuples that contain m elements (n*m blocks the same size the playground), specifies the cost of each move of the player to any specific point
         """
         if cls.__num_rows == -1 and cls.__num_columns == -1:
-            cls.__cost_matrix = cost_matrix
+            cls.__cost_matrix = tuple(tuple(row) for row in cost_matrix)
             cls.__num_rows = len(cost_matrix)
             cls.__num_columns = len(cost_matrix[0])
 
@@ -100,7 +101,7 @@ class PlayGround:
         Checks the collisions of player and the pucks with obstacles or themselves
         :return: the validity of the current playground state (Boolean value)
         """
-        objects = [self.__player] + self.__pucks + self.__obstacles
+        objects = [self.__player] + [puck_position for puck_position, is_in_goal in self.__pucks] + self.__obstacles
         for ob in objects:
             if objects.count(ob) > 1:
                 return False
@@ -159,6 +160,11 @@ class PlayGround:
                 successor_states.append((directions.get(direction), possible_future_state, cost_of_move))
 
         return successor_states
+
+    def heuristic_func(self) -> int:
+        for puck_position, is_in_goal in self.__pucks:
+            if not is_in_goal:
+                pass
 
     def is_final(self) -> bool:
         """

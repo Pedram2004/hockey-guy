@@ -106,3 +106,7 @@ class STree:
                 return result
 
         return None
+
+    def a_star_search(self) -> Node | None:
+        self.__root.heuristic_function()
+        return self.__search([self.__root], heapq.heappop, heapq.heappush)

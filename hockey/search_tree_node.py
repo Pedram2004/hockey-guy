@@ -7,7 +7,7 @@ class Node:
         self.__state = state
         self.__direction = direction
         self.__cost_from_root = cost
-        self.__heuristic_value = self.__heuristic_function()
+        self.__heuristic_value = None
         self.__children: list[Node] = []
         self.__is_final = self.__state.is_final()
         if self.__parent is not None:
@@ -26,6 +26,8 @@ class Node:
         return hash(self.__state)
 
     def __lt__(self, other: "Node") -> bool:
+        if not self.__heuristic_value and self.__comparison_mode == "g":
+            self.__heuristic_value = self.__heuristic_function()
         match self.__comparison_mode:
             case "g":
                 return self.__cost_from_root < other.__cost_from_root
@@ -39,17 +41,18 @@ class Node:
     
     def __heuristic_function(self) -> int:
         h = 0 # heuristic value
-        m = Munkres()
-        cost_matrix = [[self.__manhattan(puck, goal) for goal in self.__state.goals] for puck in self.__state.pucks]
-        indexes = sorted(m.compute(cost_matrix))
+        m = Munkres() # Hungarian algorithm to assign pucks to goals with minimum cost
+        cost_matrix = [[self.__manhattan(puck, goal) for goal in self.__state.goals] for puck, _ in self.__state.pucks]
+        indexes = sorted(m.compute(cost_matrix)) # tuples of indexes of the pucks and the goals
         for row, column in indexes:
-            h += cost_matrix[row][column] # cost of the puck to the goal
+            h += cost_matrix[row][column] # cost of moving the puck to the assigned goal
         pucks = self.__state.pucks.copy()
         current = self.__state.player
         while len(pucks) > 1:
             closest_puck = min(pucks, key=lambda x: self.__manhattan(current, x[0]))
-            h += self.__manhattan(current, closest_puck[0]) # cost of the player to the puck
-            current = self.__state.goals[indexes[self.__state.pucks.index(closest_puck)][1]] # goal of the puck
+            h += self.__manhattan(current, closest_puck[0]) # cost of moving the player to the closest puck
+            goal_index = indexes[self.__state.pucks.index(closest_puck)][1]
+            current = self.__state.goals[goal_index] # starting from the assigned goal of the puck
             pucks.remove(closest_puck)
         else:
             h += self.__manhattan(current, pucks[0][0])
@@ -73,7 +76,11 @@ class Node:
     
     @property
     def estimated_cost(self):
-        return self.__cost_from_root + self.__heuristic_value
+        try:
+            return self.__cost_from_root + self.__heuristic_value
+        except TypeError:
+            self.__heuristic_value = self.__heuristic_function()
+            return self.__cost_from_root + self.__heuristic_value
 
     @property
     def depth(self):
@@ -85,6 +92,8 @@ class Node:
     
     @comparison_mode.setter
     def comparison_mode(self, mode: str):
+        if mode not in ("g", "h", "f"):
+            raise ValueError("Invalid comparison mode, should be one of 'g', 'h' or 'f'")
         self.__comparison_mode = mode
 
     def get_path(self) -> list:
@@ -93,13 +102,6 @@ class Node:
         return self.__parent.get_path() + [self.__direction]
 
     def create_children(self) -> None:
-        for direction, future_state, move_s_cost in self.__state.successor_func():
-            self.__children.append(
-                Node(state=future_state,
-                     parent=self,
-                     direction=direction,
-                     cost=self.__cost_from_root + move_s_cost)
-            )
         if not self.__children:
             for direction, future_state, move_s_cost in self.__state.successor_func():
                 self.__children.append(

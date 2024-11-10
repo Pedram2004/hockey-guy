@@ -7,13 +7,14 @@ class Node:
         self.__state = state
         self.__direction = direction
         self.__cost_from_root = cost
-        self.__heuristic_value = 0
+        self.__heuristic_value = self.__heuristic_function()
         self.__children: list[Node] = []
         self.__is_final = self.__state.is_final()
         if self.__parent is not None:
             self.__depth: int = self.__parent.__depth + 1
         else:
             self.__depth: int = 0
+        self.__comparison_mode = "g"
 
     def __eq__(self, other: "Node") -> bool:
         return self.__state == other.__state
@@ -25,7 +26,34 @@ class Node:
         return hash(self.__state)
 
     def __lt__(self, other: "Node") -> bool:
-        return self.estimated_cost < other.estimated_cost
+        match self.__comparison_mode:
+            case "g":
+                return self.__cost_from_root < other.__cost_from_root
+            case "h":
+                return self.__heuristic_value < other.__heuristic_value
+            case "f":
+                return self.estimated_cost < other.estimated_cost
+
+    def __manhattan(self, a: tuple[int, int], b: tuple[int, int]) -> int:
+        return abs(a[0] - b[0]) + abs(a[1] - b[1])
+    
+    def __heuristic_function(self) -> int:
+        h = 0 # heuristic value
+        m = Munkres()
+        cost_matrix = [[self.__manhattan(puck, goal) for goal in self.__state.goals] for puck in self.__state.pucks]
+        indexes = sorted(m.compute(cost_matrix))
+        for row, column in indexes:
+            h += cost_matrix[row][column] # cost of the puck to the goal
+        pucks = self.__state.pucks.copy()
+        current = self.__state.player
+        while len(pucks) > 1:
+            closest_puck = min(pucks, key=lambda x: self.__manhattan(current, x[0]))
+            h += self.__manhattan(current, closest_puck[0]) # cost of the player to the puck
+            current = self.__state.goals[indexes[self.__state.pucks.index(closest_puck)][1]] # goal of the puck
+            pucks.remove(closest_puck)
+        else:
+            h += self.__manhattan(current, pucks[0][0])
+        return h
 
     @property
     def children(self):
@@ -50,6 +78,14 @@ class Node:
     @property
     def depth(self):
         return self.__depth
+    
+    @property
+    def comparison_mode(self):
+        return self.__comparison_mode
+    
+    @comparison_mode.setter
+    def comparison_mode(self, mode: str):
+        self.__comparison_mode = mode
 
     def get_path(self) -> list:
         if self.__parent is None:
@@ -72,34 +108,3 @@ class Node:
                          direction=direction,
                          cost=self.__cost_from_root + move_s_cost)
                 )
-
-
-    def __manhattan(self, a: tuple[int, int], b: tuple[int, int]) -> int:
-        return abs(a[0] - b[0]) + abs(a[1] - b[1])
-    
-    def heuristic_function(self, set_to_zero: bool = False) -> int:
-        if set_to_zero:
-            self.__heuristic_value = 0
-            return 0
-        
-        h = 0 # heuristic value
-
-        m = Munkres()
-        cost_matrix = [[self.__manhattan(puck, goal) for goal in self.__state.goals] for puck in self.__state.pucks]
-        indexes = sorted(m.compute(cost_matrix))
-
-        for row, column in indexes:
-            h += cost_matrix[row][column]
-        
-        pucks = self.__state.pucks.copy()
-        current = self.__state.player
-        while len(pucks) > 1:
-            closest_puck = min(pucks, key=lambda x: self.__manhattan(current, x[0]))
-            h += self.__manhattan(current, closest_puck[0])
-            current = self.__state.goals[indexes[self.__state.pucks.index(closest_puck)][1]] # goal of the puck
-            pucks.remove(closest_puck)
-        else:
-            h += self.__manhattan(current, pucks[0][0])
-        
-        self.__heuristic_value = h
-        return h

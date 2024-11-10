@@ -67,7 +67,7 @@ class STree:
         return self.__search(deque([self.__root]), deque.pop, deque.append)
 
     def uniform_cost_search(self) -> Node | None:
-        self.__root.heuristic_function(set_to_zero=True)
+        self.__root.comparison_mode = "g"
         return self.__search([self.__root], heapq.heappop, heapq.heappush)
 
     def __depth_limited_search(self, max_depth : int) -> tuple[Node | None, bool]:
@@ -106,7 +106,11 @@ class STree:
                 return result
 
         return None
+    
+    def best_first_search(self) -> Node | None:
+        self.__root.comparison_mode = "h"
+        return self.__search([self.__root], heapq.heappop, heapq.heappush)
 
     def a_star_search(self) -> Node | None:
-        self.__root.heuristic_function()
+        self.__root.comparison_mode = "f"
         return self.__search([self.__root], heapq.heappop, heapq.heappush)

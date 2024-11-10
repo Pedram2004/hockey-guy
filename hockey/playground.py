@@ -164,11 +164,6 @@ class PlayGround:
 
         return successor_states
 
-    def heuristic_func(self) -> int:
-        for puck_position, is_in_goal in self.__pucks:
-            if not is_in_goal:
-                pass
-
     def is_final(self) -> bool:
         """
         Checks if all pucks are in goals

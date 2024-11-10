@@ -2,6 +2,7 @@ from playground import PlayGround
 from search_tree_node import Node
 from collections import deque
 import heapq
+from typing import Callable
 
 
 class STree:
@@ -43,7 +44,7 @@ class STree:
         initial_state = PlayGround(player=player, pucks=pucks, obstacles=obstacles, goals=goals)
         return STree(initial_state)
 
-    def __search(self, priority_queue, pop_func, append_func) -> Node | None:
+    def __search(self, priority_queue: list[Node], pop_func: Callable[[list[Node]], Node], append_func: Callable[[list[Node], Node], None]) -> Node | None:
         visited_nodes = {self.__root, }
 
         while priority_queue:
@@ -66,9 +67,10 @@ class STree:
         return self.__search(deque([self.__root]), deque.pop, deque.append)
 
     def uniform_cost_search(self) -> Node | None:
+        self.__root.heuristic_function(set_to_zero=True)
         return self.__search([self.__root], heapq.heappop, heapq.heappush)
 
-    def __depth_limited_search(self, max_depth : int): #-> (Node | None, bool):
+    def __depth_limited_search(self, max_depth : int) -> tuple[Node | None, bool]:
         visited_nodes = {self.__root, }
         stack = deque([self.__root])
         is_nodes_remaining = False

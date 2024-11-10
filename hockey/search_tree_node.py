@@ -7,6 +7,7 @@ class Node:
         self.__state = state
         self.__direction = direction
         self.__cost_from_root = cost
+        self.__heuristic_value = 0
         self.__children: list[Node] = []
         self.__is_final = self.__state.is_final()
         if self.__parent is not None:
@@ -24,7 +25,7 @@ class Node:
         return hash(self.__state)
 
     def __lt__(self, other: "Node") -> bool:
-        return self.__cost_from_root < other.cost_from_root
+        return self.estimated_cost < other.estimated_cost
 
     @property
     def children(self):
@@ -41,6 +42,10 @@ class Node:
     @property
     def cost_from_root(self):
         return self.__cost_from_root
+    
+    @property
+    def estimated_cost(self):
+        return self.__cost_from_root + self.__heuristic_value
 
     @property
     def depth(self):
@@ -72,7 +77,11 @@ class Node:
     def __manhattan(self, a: tuple[int, int], b: tuple[int, int]) -> int:
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
     
-    def heuristic_function(self) -> int:
+    def heuristic_function(self, set_to_zero: bool = False) -> int:
+        if set_to_zero:
+            self.__heuristic_value = 0
+            return 0
+        
         h = 0 # heuristic value
 
         m = Munkres()
@@ -92,4 +101,5 @@ class Node:
         else:
             h += self.__manhattan(current, pucks[0][0])
         
+        self.__heuristic_value = h
         return h

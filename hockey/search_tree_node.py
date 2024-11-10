@@ -26,15 +26,6 @@ class Node:
     def __lt__(self, other: "Node") -> bool:
         return self.__cost_from_root < other.cost_from_root
 
-    def __le__(self, other: "Node") -> bool:
-        return self.__cost_from_root <= other.cost_from_root
-
-    def __gt__(self, other: "Node") -> bool:
-        return self.__cost_from_root > other.cost_from_root
-
-    def __ge__(self, other: "Node") -> bool:
-        return self.__cost_from_root >= other.cost_from_root
-
     @property
     def children(self):
         return self.__children
@@ -55,10 +46,10 @@ class Node:
     def depth(self):
         return self.__depth
 
-    def get_path(self) -> str:
+    def get_path(self) -> list:
         if self.__parent is None:
-            return self.__direction
-        return self.__parent.get_path() + self.__direction
+            return []
+        return self.__parent.get_path() + [self.__direction]
 
     def create_children(self) -> None:
         for direction, future_state, move_s_cost in self.__state.successor_func():
@@ -68,6 +59,15 @@ class Node:
                      direction=direction,
                      cost=self.__cost_from_root + move_s_cost)
             )
+        if not self.__children:
+            for direction, future_state, move_s_cost in self.__state.successor_func():
+                self.__children.append(
+                    Node(state=future_state,
+                         parent=self,
+                         direction=direction,
+                         cost=self.__cost_from_root + move_s_cost)
+                )
+
 
     def __manhattan(self, a: tuple[int, int], b: tuple[int, int]) -> int:
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
@@ -93,6 +93,3 @@ class Node:
             h += self.__manhattan(current, pucks[0][0])
         
         return h
-        
-        
-        

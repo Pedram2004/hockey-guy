@@ -96,7 +96,7 @@ class PlayGround:
                 return True
         return False
 
-    def is_playground_valid(self) -> bool:
+    def is_playground_valid(self, parent_state) -> bool:
         """
         Checks the collisions of player and the pucks with obstacles or themselves
         :return: the validity of the current playground state (Boolean value)
@@ -105,7 +105,10 @@ class PlayGround:
         for ob in objects:
             if objects.count(ob) > 1:
                 return False
-        return True
+        if parent_state.__player in self.__obstacles and self.__player in parent_state.__obstacles:
+            return False
+        else:
+            return True
 
     def successor_func(self) -> list[tuple[str, "PlayGround", int]]:
         """
@@ -155,7 +158,7 @@ class PlayGround:
                 obstacle_cycle=(self.__obstacle_cycle + 1) % 4
             )
 
-            if possible_future_state.is_playground_valid():
+            if possible_future_state.is_playground_valid(self):
                 cost_of_move = PlayGround.__cost_matrix[player_new_position[0]][player_new_position[1]]
                 successor_states.append((directions.get(direction), possible_future_state, cost_of_move))
 

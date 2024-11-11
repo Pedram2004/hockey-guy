@@ -1,5 +1,29 @@
 # Hockey Player (Sokobon) Documentation
-
+  Utilizing different informed and uninformed searches to find a path taken by the player which can result in an end state.
+## Game Description
+  On a rectangular grid, which includes obstacles, pucks and goals (the number of pucks and goals are the same). It is the player's aim to put all pucks in goals such that no more than __one__ puck is assigned the same goal.
+  - ### _Rules:_
+    - __Player__ and the __pucks__ must not collide with obstacles (This state is considered invalid).
+    - To move a __puck__ towards a particular direction, the __player__ must be on the opposite side of the puck and move towards the intended direction.
+    - __Obstacles__ do counter clockwise rotation within a _2_ by _2_ square starting from the top right corner of said square.
+      <br> The __obstacles__ rotate based on the given pattern one move at each movement of the player's.
+    - Once a __puck__ has reached an available __goal__, the puck act as an immovable object which can not be crossed.
+      
+<h2>External Libraries</h2>
+  The list of libraries whcih were imported in this program.
+  
+  - <h3>Standard Libraries</h3>
+  
+    - `heapq`: It is used as a priority queue to select a [node](#node) with the minimum of cost in [`STree`](#stree).
+    - `deque`: The usage is for the stack and queue structure required by `breadth_first_search` and `depth_first_search` in [`STree`](#stree) because of the additional functionality as comapred to a `list`.
+      
+    `typing` and `collections.abc` are imported only to add extra clarification to the type of some functions arguments.
+  - `munkres`: An external library to solve the delivery problem encoutnering when calculating the minimum moves to assign __pucks__ to a respective __goal__.
+    <br> It is used in `heuristic_func` for the calculations.
+    <br> To install it, run ```pip install munkres```.
+    
+## Requirements:
+  
 ## Classes
 - <h3 id="playground"><code>PlayGround</code></h3>
   Encapsulation of the playing ground with all its elements including the player, pucks,   obstacles, goals and the cost of movement.

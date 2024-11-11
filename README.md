@@ -40,7 +40,7 @@
     - `heuristic_func`:
     - `is_final`: Checks if all pucks have reached a goal by checking their _1_ index.
       
-- ### `Node`
+- <h3 id="node"><code>Node</code></h3>
 
   - Holds the related information to the state of the playground and how it was reached.
     <br> It is primarily used in [`STree`](#stree) to connects each state to others.
@@ -61,8 +61,6 @@
        <br> For usage outside of the class, it is made to be the `is_final` property.
     9. `__depth`: The depth in the [search tree](#stree) in which the node has been reached (found). It is its `__parent`'s depth plus _1_.
        <br> For usage outside of the class, it is made to be the `depth` property.
-> [!warning]
-> The `children` property returns the list of children nodes directly, the consequences of object aliasing should be consider before any usage.
 
   - #### _Methods:_
     
@@ -81,6 +79,10 @@
         - `_is_heuristic_based`: Used to call the `heuristic_func` when `True` and assign some value to `__heuristic_value`.
         - `_is_cost_based`: Similar to `_is_heuristic_cost`, but will set cost of movements to _0_ when is `False` (in other words, the search is only heuristic based i.e. `best_first_search`).
     - The rest of the methods are `getter`s decorated with `@property` for almost all attributes of the class (except `__state` and `__parent`).
+      
+> [!warning]
+> The `children` property returns the list of children nodes directly, the consequences of object aliasing should be consider before any usage.
+
 
  - ### `STree`
    The tree structure that is used in searching the state space of the problem.

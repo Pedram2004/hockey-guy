@@ -54,7 +54,6 @@ class STree:
             current_node = pop_func(priority_queue)
             current_node.create_children(_is_heuristic_based=is_heuristic_based,
                                          _is_cost_based=is_cost_based)
-
             for child_node in current_node.children:
                 if child_node.is_final:
                     return child_node
@@ -73,46 +72,75 @@ class STree:
     def uniform_cost_search(self) -> Node | None:
         return self.__search([self.__root], heapq.heappop, heapq.heappush)
 
-    def __depth_limited_search(self, max_depth: int) -> tuple[Node | None, bool]:
+    def __depth_limited_search(self, max_depth: int) -> tuple[Node | None, int]:
+        if self.__root.is_final:
+            return self.__root, 0
+
         visited_nodes = {self.__root, }
         stack = deque([self.__root])
-        is_nodes_remaining = False
-
+        max_reached_depth = float("-inf")
         while stack:
             current_node = stack.pop()
-
-            if current_node.depth <= max_depth:
+            if current_node.depth < max_depth:
                 current_node.create_children(_is_heuristic_based=False,
                                              _is_cost_based=True)
 
             for child_node in current_node.children:
+                max_reached_depth = max(max_reached_depth, child_node.depth)
                 if child_node.is_final:
-                    return child_node, False
+                    return child_node, max_reached_depth
                 elif child_node not in visited_nodes:
-
-                    if child_node.depth <= max_depth:
+                    if child_node.depth < max_depth:
                         visited_nodes.add(child_node)
                         stack.append(child_node)
-                    elif child_node.depth == max_depth + 1:
-                        is_nodes_remaining = True
 
-        return None, is_nodes_remaining
+        return None, max_reached_depth
 
     def iterative_deepening_search(self) -> Node | None:
         maximum_depth = 0
-        is_nodes_remain = True
 
-        while is_nodes_remain:
-            result, is_nodes_remain = self.__depth_limited_search(maximum_depth)
-            maximum_depth += 1
+        while True:
+            result, max_reached_depth = self.__depth_limited_search(maximum_depth)
 
             if result is not None:
                 return result
-
-        return None
+            elif max_reached_depth < maximum_depth:
+                return None
+            maximum_depth += 1
 
     def best_first_search(self) -> Node | None:
         return self.__search([self.__root], heapq.heappop, heapq.heappush, is_heuristic_based=True, is_cost_based=False)
 
     def a_star_search(self) -> Node | None:
         return self.__search([self.__root], heapq.heappop, heapq.heappush, is_heuristic_based=True)
+
+    def __depth_limited_a_star_search(self, threshold: int) -> tuple[Node | None, int]:
+        visited_nodes = {self.__root, }
+        priority_heap = [self.__root]
+        min_threshold = float('inf')
+
+        while priority_heap:
+            current_node = heapq.heappop(priority_heap)
+
+            if current_node.estimated_cost <= threshold:
+                current_node.create_children(_is_heuristic_based=True,
+                                             _is_cost_based=True)
+
+            for child_node in current_node.children:
+                if child_node.is_final:
+                    return child_node, threshold
+                elif child_node not in visited_nodes:
+                    if child_node.estimated_cost <= threshold:
+                        visited_nodes.add(child_node)
+                        heapq.heappush(priority_heap, child_node)
+                    else:
+                        min_threshold = min(min_threshold, child_node.estimated_cost)
+
+        return None, min_threshold
+    
+    def iterative_deepening_a_star_search(self) -> Node | None:
+        threshold = self.__root.estimated_cost
+        while True:
+            result, threshold = self.__depth_limited_a_star_search(threshold)
+            if result is not None:
+                return result

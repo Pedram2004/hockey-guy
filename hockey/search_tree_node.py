@@ -42,6 +42,12 @@ class Node:
     @property
     def cost_from_root(self):
         return self.__cost_from_root
+    
+    @property
+    def estimated_cost(self):
+        if self.__heuristic_value == 0:
+            self.__heuristic_value = self.__state.heuristic_func()
+        return self.__cost_from_root + self.__heuristic_value
 
     @property
     def depth(self):
@@ -53,16 +59,16 @@ class Node:
         return self.__parent.get_path() + [self.__direction]
 
     def create_children(self, _is_heuristic_based: bool, _is_cost_based : bool) -> None:
-        if not self.__children:
-            for direction, future_state, move_s_cost in self.__state.successor_func():
-                if not _is_cost_based:
-                    move_s_cost = 0
-                cost = self.__cost_from_root + move_s_cost
-                child_node = Node(state=future_state,
-                                  parent=self,
-                                  direction=direction,
-                                  _cost=cost)
-                if _is_heuristic_based:
-                    child_node.__heuristic_value = child_node.__state.heuristic_func()
+        self.__children = []
+        for direction, future_state, move_s_cost in self.__state.successor_func():
+            if not _is_cost_based:
+                move_s_cost = 0
+            cost = self.__cost_from_root + move_s_cost
+            child_node = Node(state=future_state,
+                                parent=self,
+                                direction=direction,
+                                _cost=cost)
+            if _is_heuristic_based:
+                child_node.__heuristic_value = child_node.__state.heuristic_func()
 
-                self.__children.append(child_node)
+            self.__children.append(child_node)

@@ -47,9 +47,6 @@ class Node:
     def depth(self):
         return self.__depth
 
-    def __set_heuristic_value(self):
-        self.__heuristic_value = self.__state.heuristic_func()
-
     def get_path(self) -> list:
         if self.__parent is None:
             return []
@@ -65,7 +62,7 @@ class Node:
                                   parent=self,
                                   direction=direction,
                                   _cost=cost)
-                if not _is_heuristic_based:
-                    child_node.__set_heuristic_value()
+                if _is_heuristic_based:
+                    child_node.__heuristic_value = child_node.__state.heuristic_func()
 
                 self.__children.append(child_node)

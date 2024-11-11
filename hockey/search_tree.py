@@ -1,5 +1,4 @@
 from collections.abc import Iterable
-
 from playground import PlayGround
 from search_tree_node import Node
 from collections import deque
@@ -17,10 +16,10 @@ class STree:
         num_rows, _ = map(int, input().split(' '))
 
         cost_matrix: list[list] = []
-        player: tuple = (0, 0)
-        pucks: list[tuple[tuple, bool]] = []
-        obstacles: list[tuple] = []
-        goals: list[tuple] = []
+        player: tuple[int, int] = (0, 0)
+        pucks: list[tuple[tuple[int, int], bool]] = []
+        obstacles: list[tuple[int, int]] = []
+        goals: list[tuple[int, int]] = []
 
         for i in range(num_rows):
 
@@ -46,12 +45,15 @@ class STree:
         initial_state = PlayGround(player=player, pucks=pucks, obstacles=obstacles, goals=goals)
         return STree(initial_state)
 
-    def __search(self, priority_queue: Iterable[Node], pop_func: Callable, append_func: Callable) -> Node | None:
+    def __search(self, priority_queue: Iterable[Node], pop_func: Callable, append_func: Callable,
+                 is_heuristic_based: bool = False, is_cost_based: bool = True) -> Node | None:
+
         visited_nodes = {self.__root, }
 
         while priority_queue:
             current_node = pop_func(priority_queue)
-            current_node.create_children()
+            current_node.create_children(_is_heuristic_based=is_heuristic_based,
+                                         _is_cost_based=is_cost_based)
 
             for child_node in current_node.children:
                 if child_node.is_final:
@@ -69,10 +71,9 @@ class STree:
         return self.__search(deque([self.__root]), deque.pop, deque.append)
 
     def uniform_cost_search(self) -> Node | None:
-        self.__root.comparison_mode = "g"
         return self.__search([self.__root], heapq.heappop, heapq.heappush)
 
-    def __depth_limited_search(self, max_depth : int) -> tuple[Node | None, bool]:
+    def __depth_limited_search(self, max_depth: int) -> tuple[Node | None, bool]:
         visited_nodes = {self.__root, }
         stack = deque([self.__root])
         is_nodes_remaining = False
@@ -81,7 +82,8 @@ class STree:
             current_node = stack.pop()
 
             if current_node.depth <= max_depth:
-                current_node.create_children()
+                current_node.create_children(_is_heuristic_based=False,
+                                             _is_cost_based=True)
 
             for child_node in current_node.children:
                 if child_node.is_final:
@@ -101,18 +103,16 @@ class STree:
         is_nodes_remain = True
 
         while is_nodes_remain:
-            result, is_nodes_remain= self.__depth_limited_search(maximum_depth)
+            result, is_nodes_remain = self.__depth_limited_search(maximum_depth)
             maximum_depth += 1
 
             if result is not None:
                 return result
 
         return None
-    
+
     def best_first_search(self) -> Node | None:
-        self.__root.comparison_mode = "h"
-        return self.__search([self.__root], heapq.heappop, heapq.heappush)
+        return self.__search([self.__root], heapq.heappop, heapq.heappush, is_heuristic_based=True, is_cost_based=False)
 
     def a_star_search(self) -> Node | None:
-        self.__root.comparison_mode = "f"
-        return self.__search([self.__root], heapq.heappop, heapq.heappush)
+        return self.__search([self.__root], heapq.heappop, heapq.heappush, is_heuristic_based=True)

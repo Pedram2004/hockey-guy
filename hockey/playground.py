@@ -1,9 +1,14 @@
+from munkres import Munkres
+
+
 class PlayGround:
     __cost_matrix: tuple[tuple]
     __num_rows = -1
     __num_columns = -1
 
-    def __init__(self, player: tuple, pucks: list[tuple[tuple, bool]], obstacles: list[tuple], goals: list[tuple], obstacle_cycle: int = 0) -> None:
+    def __init__(self, player: tuple[int, int], pucks: list[tuple[tuple[int, int], bool]],
+                 obstacles: list[tuple[int, int]], goals: list[tuple[int, int]],
+                 obstacle_cycle: int = 0) -> None:
         """
         Initializes:\n
         __player, __obstacles, __pucks, __goals, __obstacle_cycle
@@ -137,9 +142,9 @@ class PlayGround:
                         if puck_position[0] == goal_position[0] and puck_position[1] == goal_position[1]:
                             in_goal = True
                     if not PlayGround.is_index_within_range(puck_position):
-                        is_illegal_move = True    
+                        is_illegal_move = True
                 pucks_new_positions.append((tuple(puck_position), in_goal))
-                
+
             if is_illegal_move:
                 continue
 
@@ -163,6 +168,33 @@ class PlayGround:
 
         return successor_states
 
+    @staticmethod
+    def __manhattan(a: tuple[int, int], b: tuple[int, int]) -> int:
+        return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+    def heuristic_func(self) -> int:
+        estimated_cost_to_goal = 0  # heuristic value
+        m = Munkres()  # Hungarian algorithm to assign pucks to goals with minimum cost
+
+        cost_matrix = [[PlayGround.__manhattan(puck, goal) for goal in self.__goals] for puck, _ in self.__pucks]
+
+        indexes = sorted(m.compute(cost_matrix))  # tuples of indexes of the pucks and the goals
+        for row, column in indexes:
+            estimated_cost_to_goal += cost_matrix[row][column]  # cost of moving the puck to the assigned goal
+
+        pucks = self.__pucks.copy()
+        current = self.__player
+        while len(pucks) > 1:
+            closest_puck = min(pucks, key=lambda x: PlayGround.__manhattan(current, x[0]))
+            estimated_cost_to_goal += PlayGround.__manhattan(current, closest_puck[0])  # cost of moving the player to the closest puck
+            goal_index = indexes[self.__pucks.index(closest_puck)][1]
+            current = self.__goals[goal_index]  # starting from the assigned goal of the puck
+            pucks.remove(closest_puck)
+        else:
+            estimated_cost_to_goal += PlayGround.__manhattan(current, pucks[0][0])
+
+        return estimated_cost_to_goal
+
     def is_final(self) -> bool:
         """
         Checks if all pucks are in goals
@@ -172,4 +204,3 @@ class PlayGround:
             if not puck[1]:
                 return False
         return True
-    

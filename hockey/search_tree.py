@@ -114,3 +114,34 @@ class STree:
     def a_star_search(self) -> Node | None:
         self.__root.comparison_mode = "f"
         return self.__search([self.__root], heapq.heappop, heapq.heappush)
+    
+    def __depth_limited_a_star_search(self, threshold: int) -> tuple[Node | None, int]:
+        visited_nodes = {self.__root, }
+        priority_heap = [self.__root]
+        min_threshold = float('inf')
+
+        while priority_heap:
+            current_node = heapq.heappop(priority_heap)
+
+            if current_node.estimated_cost <= threshold:
+                current_node.create_children()
+
+            for child_node in current_node.children:
+                if child_node.is_final:
+                    return child_node, threshold
+                elif child_node not in visited_nodes:
+                    if child_node.estimated_cost <= threshold:
+                        visited_nodes.add(child_node)
+                        heapq.heappush(priority_heap, child_node)
+                    else:
+                        min_threshold = min(min_threshold, child_node.estimated_cost)
+
+        return None, min_threshold
+    
+    def iterative_deepening_a_star_search(self) -> Node | None:
+        self.__root.comparison_mode = "f"
+        threshold = self.__root.estimated_cost
+        while True:
+            result, threshold = self.__depth_limited_a_star_search(threshold)
+            if result is not None:
+                return result

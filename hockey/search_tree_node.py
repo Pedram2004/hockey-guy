@@ -102,11 +102,11 @@ class Node:
         return self.__parent.get_path() + [self.__direction]
 
     def create_children(self) -> None:
-        if not self.__children:
-            for direction, future_state, move_s_cost in self.__state.successor_func():
-                self.__children.append(
-                    Node(state=future_state,
-                         parent=self,
-                         direction=direction,
-                         cost=self.__cost_from_root + move_s_cost)
-                )
+        self.__children = []
+        for direction, future_state, move_s_cost in self.__state.successor_func():
+            self.__children.append(
+                Node(state=future_state,
+                        parent=self,
+                        direction=direction,
+                        cost=self.__cost_from_root + move_s_cost)
+            )

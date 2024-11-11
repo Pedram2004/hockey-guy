@@ -96,7 +96,7 @@ class PlayGround:
                 return True
         return False
 
-    def is_playground_valid(self, parent_state) -> bool:
+    def is_playground_valid(self, parent_state: "PlayGround") -> bool:
         """
         Checks the collisions of player and the pucks with obstacles or themselves
         :return: the validity of the current playground state (Boolean value)
@@ -159,7 +159,7 @@ class PlayGround:
             )
 
             if possible_future_state.is_playground_valid(self):
-                cost_of_move = PlayGround.__cost_matrix[player_new_position[0]][player_new_position[1]]
+                cost_of_move = PlayGround.__cost_matrix[player_new_position[1]][player_new_position[0]]
                 successor_states.append((directions.get(direction), possible_future_state, cost_of_move))
 
         return successor_states

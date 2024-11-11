@@ -1,5 +1,5 @@
-from playground import PlayGround
-from search_tree_node import Node
+from .playground import PlayGround
+from .search_tree_node import Node
 from collections import deque
 import heapq
 from typing import Callable
@@ -22,7 +22,7 @@ class STree:
 
         for i in range(num_rows):
 
-            cost_matrix[i] = []
+            cost_matrix.append([])
             for j, element in enumerate(input().split(' ')):
                 if element.isdigit():
                     cost_matrix[i].append(int(element))

@@ -27,12 +27,13 @@ class PlayGround:
         if isinstance(other, PlayGround):
             if self.__player != other.player:
                 return False
-            elif self.__obstacles != other.obstacles:
+            elif self.__obstacle_cycle != other.__obstacle_cycle:
                 return False
             elif frozenset(self.__pucks) != frozenset(other.pucks):
                 return False
             else:
                 return True
+        return False
 
     def __str__(self) -> str:
         return f"Player: {self.__player}\nPucks: {self.__pucks}\nObstacles: {self.__obstacles}"

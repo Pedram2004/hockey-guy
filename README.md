@@ -17,13 +17,15 @@
     - `heapq`: It is used as a priority queue to select a [node](#node) with the minimum of cost in [`STree`](#stree).
     - `deque`: The usage is for the stack and queue structure required by `breadth_first_search` and `depth_first_search` in [`STree`](#stree) because of the additional functionality as comapred to a `list`.
       
-    `typing` and `collections.abc` are imported only to add extra clarification to the type of some functions arguments.
+    `typing` is imported only to add extra clarification to the type of some functions arguments.
   - `munkres`: An external library to solve the delivery problem encoutnering when calculating the minimum moves to assign __pucks__ to a respective __goal__.
     <br> It is used in `heuristic_func` for the calculations.
     <br> To install it, run ```pip install munkres```.
     
 ## Requirements:
-  
+  - `munkres`: Implementation of the Hungarian Algorithm.
+        <br> To install it, run ```pip install munkres```.
+
 ## Classes
 - <h3 id="playground"><code>PlayGround</code></h3>
   Encapsulation of the playing ground with all its elements including the player, pucks,   obstacles, goals and the cost of movement.
@@ -45,8 +47,8 @@
   - #### _Methods:_
     
     - #### *Dunder Methods:*
-      - `__eq__`: 
-      - `__hash__`:
+      - `__eq__`: Checks if position of the player, obstacles, and pucks are the same
+      - `__hash__`: hashes the position of the player, obstacles, and pucks
         
     - #### *Class Methods:*
       - `set_class_vars`: Suggesting of its name set up the class attributes of <a href="#playground">`PlayGround`</a>.
@@ -61,7 +63,7 @@
       <br> It also checks if the created state ([`Playground`](#playground) object) is valid using `is_playground_valid`.
       <br> **Returns** a list of tuples which at _0_ index contain the direction of player's move, at _1_ index the new [`Playground`](#playground) instance and at _2_ index the cost of moving to a new position.
     - `__manhattan`: Calculates the Manhattan distance from two points (square) in the state's grid.
-    - `heuristic_func`:
+    - `heuristic_func`: Assignes a goal to each puck based on Hungarian Algorithm, then calculates the Manhattan distance of player to the nearest puck, puck to its assigned goal, assigned goal to the nearest puck and so on.
     - `is_final`: Checks if all pucks have reached a goal by checking their _1_ index.
       
 - <h3 id="node"><code>Node</code></h3>
@@ -85,12 +87,13 @@
        <br> For usage outside of the class, it is made to be the `is_final` property.
     9. `__depth`: The depth in the [search tree](#stree) in which the node has been reached (found). It is its `__parent`'s depth plus _1_.
        <br> For usage outside of the class, it is made to be the `depth` property.
+    10. `__comparison_mode`: Can be g, h, or f. Used for differentiating between UCS, BestFS, and A*.
 
   - #### _Methods:_
     
     - ##### Dunder Methods:
-      - `__eq__`:
-      - `__hash__`:
+      - `__eq__`: Returns the value of `__eq__` from [`Playground`](#playground).
+      - `__hash__`: Returns the value of `__hash__` from [`Playground`](#playground).
       - `__lt__`: Comparing `__heuristic_value` plus `__cost_from_root` of nodes with eachother.
       <br> Used in comparisons made in priority queues which are present in various search algorithms (the ones using `heapq` library).
  
@@ -99,9 +102,6 @@
       <br> Uses the `Playground`'s successor function (`successor_func`) to create all the valid possible states and the __direction__ to move the player that would lead to it.
       <br> Based on where it is used, it will set the cost of movements to _0_ (i.e. `best_first_search`), or will call `heuristic_func` from <a href="#playground">`Playground`</a> to assign value to       
       `__heuristic_value` of the child node (with informed searches).
-      - *Parameters:*
-        - `_is_heuristic_based`: Used to call the `heuristic_func` when `True` and assign some value to `__heuristic_value`.
-        - `_is_cost_based`: Similar to `_is_heuristic_cost`, but will set cost of movements to _0_ when is `False` (in other words, the search is only heuristic based i.e. `best_first_search`).
     - The rest of the methods are `getter`s decorated with `@property` for almost all attributes of the class (except `__state` and `__parent`).
       
 > [!warning]
@@ -113,8 +113,8 @@
    - #### _Attributes:_
      1. `__root`: The initial state that the game starts from, represented by a <a href="#node">`Node`</a> instance.
    - #### _Methods:_
-     - `input_conversion`:
-     - `__search`:
+     - `input_conversion`: A function to transfrom str input to tree.
+     - `__search`: Tree search algorithm that gets the type of array(fringe) and its append and pop methods as parameter.
      - `breadth_first_search`:
      - `depth_first_search`:
      - `uniform_cost_search`:
@@ -122,3 +122,5 @@
      - `iterative_deepening_search`:
      - `best_first_search`:
      - `a_star_search`:
+     - `__depth_limited_a_star_search`:
+     - `iterative_deepening_a_star_search`:

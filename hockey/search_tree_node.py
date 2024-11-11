@@ -36,27 +36,32 @@ class Node:
             case "f":
                 return self.estimated_cost < other.estimated_cost
 
-    def __manhattan(self, a: tuple[int, int], b: tuple[int, int]) -> int:
+    @staticmethod
+    def __manhattan(a: tuple[int, int], b: tuple[int, int]) -> int:
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
     
     def __heuristic_function(self) -> int:
-        h = 0 # heuristic value
+        estimated_cost_to_goal = 0 # heuristic value
         m = Munkres() # Hungarian algorithm to assign pucks to goals with minimum cost
-        cost_matrix = [[self.__manhattan(puck, goal) for goal in self.__state.goals] for puck, _ in self.__state.pucks]
+
+        cost_matrix = [[Node.__manhattan(puck, goal) for goal in self.__state.goals] for puck, _ in self.__state.pucks]
+
         indexes = sorted(m.compute(cost_matrix)) # tuples of indexes of the pucks and the goals
         for row, column in indexes:
-            h += cost_matrix[row][column] # cost of moving the puck to the assigned goal
+            estimated_cost_to_goal += cost_matrix[row][column] # cost of moving the puck to the assigned goal
+
         pucks = self.__state.pucks.copy()
         current = self.__state.player
         while len(pucks) > 1:
-            closest_puck = min(pucks, key=lambda x: self.__manhattan(current, x[0]))
-            h += self.__manhattan(current, closest_puck[0]) # cost of moving the player to the closest puck
+            closest_puck = min(pucks, key=lambda x: Node.__manhattan(current, x[0]))
+            estimated_cost_to_goal += Node.__manhattan(current, closest_puck[0]) # cost of moving the player to the closest puck
             goal_index = indexes[self.__state.pucks.index(closest_puck)][1]
             current = self.__state.goals[goal_index] # starting from the assigned goal of the puck
             pucks.remove(closest_puck)
         else:
-            h += self.__manhattan(current, pucks[0][0])
-        return h
+            estimated_cost_to_goal += Node.__manhattan(current, pucks[0][0])
+
+        return estimated_cost_to_goal
 
     @property
     def children(self):

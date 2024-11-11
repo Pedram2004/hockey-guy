@@ -1,3 +1,5 @@
+from collections.abc import Iterable
+
 from playground import PlayGround
 from search_tree_node import Node
 from collections import deque
@@ -44,7 +46,7 @@ class STree:
         initial_state = PlayGround(player=player, pucks=pucks, obstacles=obstacles, goals=goals)
         return STree(initial_state)
 
-    def __search(self, priority_queue: list[Node], pop_func: Callable[[list[Node]], Node], append_func: Callable[[list[Node], Node], None]) -> Node | None:
+    def __search(self, priority_queue: Iterable[Node], pop_func: Callable, append_func: Callable) -> Node | None:
         visited_nodes = {self.__root, }
 
         while priority_queue:

@@ -29,8 +29,7 @@ class PlayGround:
                 return False
             elif self.__obstacles != other.obstacles:
                 return False
-            elif self.__pucks != other.pucks: #TODO is this true for all cases?
-                #can't the player just swap states?
+            elif frozenset(self.__pucks) != frozenset(other.pucks):
                 return False
             else:
                 return True
@@ -39,7 +38,7 @@ class PlayGround:
         return f"Player: {self.__player}\nPucks: {self.__pucks}\nObstacles: {self.__obstacles}"
 
     def __hash__(self) -> int:
-        return hash((self.__player, tuple(self.__obstacles), tuple(self.__pucks))) #TODO same thing as line 32
+        return hash((self.__player, tuple(self.__obstacles), frozenset(self.__pucks)))
 
     @property
     def player(self):
